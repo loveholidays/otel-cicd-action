@@ -84064,15 +84064,12 @@ class JSONSpanExporter {
             });
         }
         coreExports.info(`Resulting Spans: ${spansStorage}`);
-        // Indicate successful export
-        resultCallback({ code: ExportResultCode.SUCCESS });
-    }
-    async forceFlush() {
         const filename = "data.json";
         coreExports.info(`Starting Spans to be Written: ${spansStorage}`);
         writeObjectToJsonFile(filename, spansStorage);
         coreExports.info(`File Written Successfully to ${filename}`);
-        return Promise.resolve();
+        // Indicate successful export
+        resultCallback({ code: ExportResultCode.SUCCESS });
     }
     // Graceful shutdown
     async shutdown() {

@@ -75,17 +75,15 @@ class JSONSpanExporter implements SpanExporter {
 
     core.info(`Resulting Spans: ${spansStorage}`);
 
-    // Indicate successful export
-    resultCallback({ code: ExportResultCode.SUCCESS });
-  }
-  async forceFlush(): Promise<void> {
     const filename = "data.json";
     core.info(`Starting Spans to be Written: ${spansStorage}`);
 
     writeObjectToJsonFile(filename, spansStorage);
 
     core.info(`File Written Successfully to ${filename}`);
-    return Promise.resolve();
+
+    // Indicate successful export
+    resultCallback({ code: ExportResultCode.SUCCESS });
   }
 
   // Graceful shutdown
