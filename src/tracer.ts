@@ -1,16 +1,72 @@
 import * as grpc from "@grpc/grpc-js";
 import { context } from "@opentelemetry/api";
+import type { Attributes } from "@opentelemetry/api";
 import { AsyncHooksContextManager } from "@opentelemetry/context-async-hooks";
+import { ExportResultCode } from "@opentelemetry/core";
 import { OTLPTraceExporter as GrpcOTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
 import { OTLPTraceExporter as ProtoOTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { Resource, type ResourceAttributes } from "@opentelemetry/resources";
+
 import {
   BasicTracerProvider,
   BatchSpanProcessor,
-  ConsoleSpanExporter,
   type IdGenerator,
+  type ReadableSpan,
   type SpanExporter,
 } from "@opentelemetry/sdk-trace-base";
+
+interface ExportedSpanData {
+  traceId: string;
+  spanId: string;
+  parentSpanId: string | null;
+  name: string;
+  kind: number;
+  startTime: [number, number];
+  endTime: [number, number];
+  attributes: Record<string, unknown>;
+  events: {
+    name: string;
+    time: [number, number];
+    attributes?: Attributes | undefined;
+  }[];
+  status: {
+    code: number;
+    message?: string;
+  };
+}
+
+let spansStorage: ExportedSpanData[] = []; // In-memory storage for spans
+
+class JSONSpanExporter implements SpanExporter {
+  export(spans: ReadableSpan[], resultCallback: (result: { code: ExportResultCode }) => void): void {
+    for (const span of spans) {
+      spansStorage.push({
+        traceId: span.spanContext().traceId,
+        spanId: span.spanContext().spanId,
+        parentSpanId: span.parentSpanId || null,
+        name: span.name,
+        kind: span.kind,
+        startTime: span.startTime,
+        endTime: span.endTime,
+        attributes: span.attributes,
+        status: span.status,
+        events: span.events.map((event) => ({
+          name: event.name,
+          time: event.time,
+          attributes: event.attributes,
+        })),
+      });
+    }
+    // Indicate successful export
+    resultCallback({ code: ExportResultCode.SUCCESS });
+  }
+
+  // Graceful shutdown
+  async shutdown(): Promise<void> {
+    spansStorage = []; // Optionally clear storage on shutdown
+    return Promise.resolve();
+  }
+}
 
 const OTEL_CONSOLE_ONLY = process.env["OTEL_CONSOLE_ONLY"] === "true";
 const OTEL_ID_SEED = Number.parseInt(process.env["OTEL_ID_SEED"] ?? "0");
@@ -37,7 +93,9 @@ function createTracerProvider(endpoint: string, headers: string, attributes: Res
   contextManager.enable();
   context.setGlobalContextManager(contextManager);
 
-  let exporter: SpanExporter = new ConsoleSpanExporter();
+  let exporter: SpanExporter = new JSONSpanExporter(); // Use custom exporter
+
+  // let exporter: SpanExporter = new ConsoleSpanExporter();
 
   if (!OTEL_CONSOLE_ONLY) {
     if (isHttpEndpoint(endpoint)) {
@@ -107,5 +165,7 @@ class DeterministicIdGenerator implements IdGenerator {
     return id;
   }
 }
-
-export { stringToRecord, createTracerProvider };
+function getTraceJSON() {
+  return JSON.stringify(spansStorage, null, 2);
+}
+export { stringToRecord, createTracerProvider, getTraceJSON };

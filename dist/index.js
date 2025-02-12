@@ -32110,7 +32110,7 @@ var __read$c = (undefined && undefined.__read) || function (o, n) {
     }
     return ar;
 };
-var __values$8 = (undefined && undefined.__values) || function(o) {
+var __values$7 = (undefined && undefined.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
     if (o && typeof o.length === "number") return {
@@ -32156,7 +32156,7 @@ var BaggageImpl = /** @class */ (function () {
         }
         var newBaggage = new BaggageImpl(this._entries);
         try {
-            for (var keys_1 = __values$8(keys), keys_1_1 = keys_1.next(); !keys_1_1.done; keys_1_1 = keys_1.next()) {
+            for (var keys_1 = __values$7(keys), keys_1_1 = keys_1.next(); !keys_1_1.done; keys_1_1 = keys_1.next()) {
                 var key = keys_1_1.value;
                 newBaggage._entries.delete(key);
             }
@@ -64398,264 +64398,6 @@ function requireSrc$2 () {
 
 var srcExports$1 = /*@__PURE__*/ requireSrc$2();
 
-var src$1 = {};
-
-var OTLPTraceExporter$1 = {};
-
-var src = {};
-
-var convertLegacyOtlpGrpcOptions = {};
-
-var otlpGrpcConfiguration = {};
-
-/*
- * Copyright The OpenTelemetry Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var OTLPExporterBase = /** @class */ (function () {
-    function OTLPExporterBase(_delegate) {
-        this._delegate = _delegate;
-    }
-    /**
-     * Export items.
-     * @param items
-     * @param resultCallback
-     */
-    OTLPExporterBase.prototype.export = function (items, resultCallback) {
-        this._delegate.export(items, resultCallback);
-    };
-    OTLPExporterBase.prototype.forceFlush = function () {
-        return this._delegate.forceFlush();
-    };
-    OTLPExporterBase.prototype.shutdown = function () {
-        return this._delegate.shutdown();
-    };
-    return OTLPExporterBase;
-}());
-
-/*
- * Copyright The OpenTelemetry Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var __extends$3 = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-/**
- * Interface for handling error
- */
-var OTLPExporterError = /** @class */ (function (_super) {
-    __extends$3(OTLPExporterError, _super);
-    function OTLPExporterError(message, code, data) {
-        var _this = _super.call(this, message) || this;
-        _this.name = 'OTLPExporterError';
-        _this.data = data;
-        _this.code = code;
-        return _this;
-    }
-    return OTLPExporterError;
-}(Error));
-
-/*
- * Copyright The OpenTelemetry Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-function validateTimeoutMillis(timeoutMillis) {
-    if (!Number.isNaN(timeoutMillis) &&
-        Number.isFinite(timeoutMillis) &&
-        timeoutMillis > 0) {
-        return timeoutMillis;
-    }
-    throw new Error("Configuration: timeoutMillis is invalid, expected number greater than 0 (actual: '" + timeoutMillis + "')");
-}
-function wrapStaticHeadersInFunction(headers) {
-    if (headers == null) {
-        return undefined;
-    }
-    return function () { return headers; };
-}
-/**
- * @param userProvidedConfiguration  Configuration options provided by the user in code.
- * @param fallbackConfiguration Fallback to use when the {@link userProvidedConfiguration} does not specify an option.
- * @param defaultConfiguration The defaults as defined by the exporter specification
- */
-function mergeOtlpSharedConfigurationWithDefaults(userProvidedConfiguration, fallbackConfiguration, defaultConfiguration) {
-    var _a, _b, _c, _d, _e, _f;
-    return {
-        timeoutMillis: validateTimeoutMillis((_b = (_a = userProvidedConfiguration.timeoutMillis) !== null && _a !== undefined ? _a : fallbackConfiguration.timeoutMillis) !== null && _b !== undefined ? _b : defaultConfiguration.timeoutMillis),
-        concurrencyLimit: (_d = (_c = userProvidedConfiguration.concurrencyLimit) !== null && _c !== undefined ? _c : fallbackConfiguration.concurrencyLimit) !== null && _d !== undefined ? _d : defaultConfiguration.concurrencyLimit,
-        compression: (_f = (_e = userProvidedConfiguration.compression) !== null && _e !== undefined ? _e : fallbackConfiguration.compression) !== null && _f !== undefined ? _f : defaultConfiguration.compression,
-    };
-}
-function getSharedConfigurationDefaults() {
-    return {
-        timeoutMillis: 10000,
-        concurrencyLimit: 30,
-        compression: 'none',
-    };
-}
-
-/*
- * Copyright The OpenTelemetry Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var CompressionAlgorithm;
-(function (CompressionAlgorithm) {
-    CompressionAlgorithm["NONE"] = "none";
-    CompressionAlgorithm["GZIP"] = "gzip";
-})(CompressionAlgorithm || (CompressionAlgorithm = {}));
-
-/*
- * Copyright The OpenTelemetry Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var __awaiter$4 = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator$4 = (undefined && undefined.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : undefined, done: true };
-    }
-};
-var BoundedQueueExportPromiseHandler = /** @class */ (function () {
-    /**
-     * @param concurrencyLimit maximum promises allowed in a queue at the same time.
-     */
-    function BoundedQueueExportPromiseHandler(concurrencyLimit) {
-        this._sendingPromises = [];
-        this._concurrencyLimit = concurrencyLimit;
-    }
-    BoundedQueueExportPromiseHandler.prototype.pushPromise = function (promise) {
-        var _this = this;
-        if (this.hasReachedLimit()) {
-            throw new Error('Concurrency Limit reached');
-        }
-        this._sendingPromises.push(promise);
-        var popPromise = function () {
-            var index = _this._sendingPromises.indexOf(promise);
-            _this._sendingPromises.splice(index, 1);
-        };
-        promise.then(popPromise, popPromise);
-    };
-    BoundedQueueExportPromiseHandler.prototype.hasReachedLimit = function () {
-        return this._sendingPromises.length >= this._concurrencyLimit;
-    };
-    BoundedQueueExportPromiseHandler.prototype.awaitAll = function () {
-        return __awaiter$4(this, undefined, undefined, function () {
-            return __generator$4(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, Promise.all(this._sendingPromises)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    return BoundedQueueExportPromiseHandler;
-}());
-/**
- * Promise queue for keeping track of export promises. Finished promises will be auto-dequeued.
- * Allows for awaiting all promises in the queue.
- */
-function createBoundedQueueExportPromiseHandler(options) {
-    return new BoundedQueueExportPromiseHandler(options.concurrencyLimit);
-}
-
 /*
  * Copyright The OpenTelemetry Authors
  *
@@ -64922,7 +64664,7 @@ var AnchoredClock = /** @class */ (function () {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __values$7 = (undefined && undefined.__values) || function(o) {
+var __values$6 = (undefined && undefined.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
     if (o && typeof o.length === "number") return {
@@ -64956,7 +64698,7 @@ function sanitizeAttributes(attributes) {
         return out;
     }
     try {
-        for (var _b = __values$7(Object.entries(attributes)), _c = _b.next(); !_c.done; _c = _b.next()) {
+        for (var _b = __values$6(Object.entries(attributes)), _c = _b.next(); !_c.done; _c = _b.next()) {
             var _d = __read$8(_c.value, 2), key = _d[0], val = _d[1];
             if (!isAttributeKey(key)) {
                 diag.warn("Invalid attribute key: " + key);
@@ -64999,7 +64741,7 @@ function isHomogeneousAttributeValueArray(arr) {
     var e_2, _a;
     var type;
     try {
-        for (var arr_1 = __values$7(arr), arr_1_1 = arr_1.next(); !arr_1_1.done; arr_1_1 = arr_1.next()) {
+        for (var arr_1 = __values$6(arr), arr_1_1 = arr_1.next(); !arr_1_1.done; arr_1_1 = arr_1.next()) {
             var element = arr_1_1.value;
             // null/undefined elements are allowed
             if (element == null)
@@ -65839,7 +65581,7 @@ var ExportResultCode;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __values$6 = (undefined && undefined.__values) || function(o) {
+var __values$5 = (undefined && undefined.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
     if (o && typeof o.length === "number") return {
@@ -65878,7 +65620,7 @@ var CompositePropagator = /** @class */ (function () {
     CompositePropagator.prototype.inject = function (context, carrier, setter) {
         var e_1, _a;
         try {
-            for (var _b = __values$6(this._propagators), _c = _b.next(); !_c.done; _c = _b.next()) {
+            for (var _b = __values$5(this._propagators), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var propagator = _c.value;
                 try {
                     propagator.inject(context, carrier, setter);
@@ -66711,7 +66453,7 @@ function shouldMerge(one, two) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __extends$2 = (undefined && undefined.__extends) || (function () {
+var __extends$3 = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -66730,7 +66472,7 @@ var __extends$2 = (undefined && undefined.__extends) || (function () {
  * Error that is thrown on timeouts.
  */
 var TimeoutError = /** @class */ (function (_super) {
-    __extends$2(TimeoutError, _super);
+    __extends$3(TimeoutError, _super);
     function TimeoutError(message) {
         var _this = _super.call(this, message) || this;
         // manually adjust prototype to retain `instanceof` functionality when targeting ES5, see:
@@ -66765,7 +66507,7 @@ function callWithTimeout(promise, timeout) {
     });
 }
 
-var __values$5 = (undefined && undefined.__values) || function(o) {
+var __values$4 = (undefined && undefined.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
     if (o && typeof o.length === "number") return {
@@ -66810,7 +66552,7 @@ function isUrlIgnored(url, ignoredUrls) {
         return false;
     }
     try {
-        for (var ignoredUrls_1 = __values$5(ignoredUrls), ignoredUrls_1_1 = ignoredUrls_1.next(); !ignoredUrls_1_1.done; ignoredUrls_1_1 = ignoredUrls_1.next()) {
+        for (var ignoredUrls_1 = __values$4(ignoredUrls), ignoredUrls_1_1 = ignoredUrls_1.next(); !ignoredUrls_1_1.done; ignoredUrls_1_1 = ignoredUrls_1.next()) {
             var ignoreUrl = ignoredUrls_1_1.value;
             if (urlMatches(url, ignoreUrl)) {
                 return true;
@@ -67099,6 +66841,264 @@ var esm$2 = /*#__PURE__*/Object.freeze({
 	unsuppressTracing: unsuppressTracing,
 	urlMatches: urlMatches
 });
+
+var src$1 = {};
+
+var OTLPTraceExporter$1 = {};
+
+var src = {};
+
+var convertLegacyOtlpGrpcOptions = {};
+
+var otlpGrpcConfiguration = {};
+
+/*
+ * Copyright The OpenTelemetry Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var OTLPExporterBase = /** @class */ (function () {
+    function OTLPExporterBase(_delegate) {
+        this._delegate = _delegate;
+    }
+    /**
+     * Export items.
+     * @param items
+     * @param resultCallback
+     */
+    OTLPExporterBase.prototype.export = function (items, resultCallback) {
+        this._delegate.export(items, resultCallback);
+    };
+    OTLPExporterBase.prototype.forceFlush = function () {
+        return this._delegate.forceFlush();
+    };
+    OTLPExporterBase.prototype.shutdown = function () {
+        return this._delegate.shutdown();
+    };
+    return OTLPExporterBase;
+}());
+
+/*
+ * Copyright The OpenTelemetry Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var __extends$2 = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+/**
+ * Interface for handling error
+ */
+var OTLPExporterError = /** @class */ (function (_super) {
+    __extends$2(OTLPExporterError, _super);
+    function OTLPExporterError(message, code, data) {
+        var _this = _super.call(this, message) || this;
+        _this.name = 'OTLPExporterError';
+        _this.data = data;
+        _this.code = code;
+        return _this;
+    }
+    return OTLPExporterError;
+}(Error));
+
+/*
+ * Copyright The OpenTelemetry Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+function validateTimeoutMillis(timeoutMillis) {
+    if (!Number.isNaN(timeoutMillis) &&
+        Number.isFinite(timeoutMillis) &&
+        timeoutMillis > 0) {
+        return timeoutMillis;
+    }
+    throw new Error("Configuration: timeoutMillis is invalid, expected number greater than 0 (actual: '" + timeoutMillis + "')");
+}
+function wrapStaticHeadersInFunction(headers) {
+    if (headers == null) {
+        return undefined;
+    }
+    return function () { return headers; };
+}
+/**
+ * @param userProvidedConfiguration  Configuration options provided by the user in code.
+ * @param fallbackConfiguration Fallback to use when the {@link userProvidedConfiguration} does not specify an option.
+ * @param defaultConfiguration The defaults as defined by the exporter specification
+ */
+function mergeOtlpSharedConfigurationWithDefaults(userProvidedConfiguration, fallbackConfiguration, defaultConfiguration) {
+    var _a, _b, _c, _d, _e, _f;
+    return {
+        timeoutMillis: validateTimeoutMillis((_b = (_a = userProvidedConfiguration.timeoutMillis) !== null && _a !== undefined ? _a : fallbackConfiguration.timeoutMillis) !== null && _b !== undefined ? _b : defaultConfiguration.timeoutMillis),
+        concurrencyLimit: (_d = (_c = userProvidedConfiguration.concurrencyLimit) !== null && _c !== undefined ? _c : fallbackConfiguration.concurrencyLimit) !== null && _d !== undefined ? _d : defaultConfiguration.concurrencyLimit,
+        compression: (_f = (_e = userProvidedConfiguration.compression) !== null && _e !== undefined ? _e : fallbackConfiguration.compression) !== null && _f !== undefined ? _f : defaultConfiguration.compression,
+    };
+}
+function getSharedConfigurationDefaults() {
+    return {
+        timeoutMillis: 10000,
+        concurrencyLimit: 30,
+        compression: 'none',
+    };
+}
+
+/*
+ * Copyright The OpenTelemetry Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var CompressionAlgorithm;
+(function (CompressionAlgorithm) {
+    CompressionAlgorithm["NONE"] = "none";
+    CompressionAlgorithm["GZIP"] = "gzip";
+})(CompressionAlgorithm || (CompressionAlgorithm = {}));
+
+/*
+ * Copyright The OpenTelemetry Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var __awaiter$4 = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator$4 = (undefined && undefined.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : undefined, done: true };
+    }
+};
+var BoundedQueueExportPromiseHandler = /** @class */ (function () {
+    /**
+     * @param concurrencyLimit maximum promises allowed in a queue at the same time.
+     */
+    function BoundedQueueExportPromiseHandler(concurrencyLimit) {
+        this._sendingPromises = [];
+        this._concurrencyLimit = concurrencyLimit;
+    }
+    BoundedQueueExportPromiseHandler.prototype.pushPromise = function (promise) {
+        var _this = this;
+        if (this.hasReachedLimit()) {
+            throw new Error('Concurrency Limit reached');
+        }
+        this._sendingPromises.push(promise);
+        var popPromise = function () {
+            var index = _this._sendingPromises.indexOf(promise);
+            _this._sendingPromises.splice(index, 1);
+        };
+        promise.then(popPromise, popPromise);
+    };
+    BoundedQueueExportPromiseHandler.prototype.hasReachedLimit = function () {
+        return this._sendingPromises.length >= this._concurrencyLimit;
+    };
+    BoundedQueueExportPromiseHandler.prototype.awaitAll = function () {
+        return __awaiter$4(this, undefined, undefined, function () {
+            return __generator$4(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, Promise.all(this._sendingPromises)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    return BoundedQueueExportPromiseHandler;
+}());
+/**
+ * Promise queue for keeping track of export promises. Finished promises will be auto-dequeued.
+ * Allows for awaiting all promises in the queue.
+ */
+function createBoundedQueueExportPromiseHandler(options) {
+    return new BoundedQueueExportPromiseHandler(options.concurrencyLimit);
+}
 
 /*
  * Copyright The OpenTelemetry Authors
@@ -81496,7 +81496,7 @@ function toAnyValue(value) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __values$4 = (undefined && undefined.__values) || function(o) {
+var __values$3 = (undefined && undefined.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
     if (o && typeof o.length === "number") return {
@@ -81533,7 +81533,7 @@ function createResourceMap$1(logRecords) {
     var e_1, _a;
     var resourceMap = new Map();
     try {
-        for (var logRecords_1 = __values$4(logRecords), logRecords_1_1 = logRecords_1.next(); !logRecords_1_1.done; logRecords_1_1 = logRecords_1.next()) {
+        for (var logRecords_1 = __values$3(logRecords), logRecords_1_1 = logRecords_1.next(); !logRecords_1_1.done; logRecords_1_1 = logRecords_1.next()) {
             var record = logRecords_1_1.value;
             var resource = record.resource, _b = record.instrumentationScope, name_1 = _b.name, _c = _b.version, version = _c === void 0 ? '' : _c, _d = _b.schemaUrl, schemaUrl = _d === void 0 ? '' : _d;
             var ismMap = resourceMap.get(resource);
@@ -82061,7 +82061,7 @@ var ProtobufMetricsSerializer = {
     },
 };
 
-var __values$3 = (undefined && undefined.__values) || function(o) {
+var __values$2 = (undefined && undefined.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
     if (o && typeof o.length === "number") return {
@@ -82160,7 +82160,7 @@ function createResourceMap(readableSpans) {
     var e_1, _a;
     var resourceMap = new Map();
     try {
-        for (var readableSpans_1 = __values$3(readableSpans), readableSpans_1_1 = readableSpans_1.next(); !readableSpans_1_1.done; readableSpans_1_1 = readableSpans_1.next()) {
+        for (var readableSpans_1 = __values$2(readableSpans), readableSpans_1_1 = readableSpans_1.next(); !readableSpans_1_1.done; readableSpans_1_1 = readableSpans_1.next()) {
             var record = readableSpans_1_1.value;
             var ilmMap = resourceMap.get(record.resource);
             if (!ilmMap) {
@@ -82514,7 +82514,7 @@ var __assign = (undefined && undefined.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __values$2 = (undefined && undefined.__values) || function(o) {
+var __values$1 = (undefined && undefined.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
     if (o && typeof o.length === "number") return {
@@ -82622,7 +82622,7 @@ var Span = /** @class */ (function () {
     Span.prototype.setAttributes = function (attributes) {
         var e_1, _a;
         try {
-            for (var _b = __values$2(Object.entries(attributes)), _c = _b.next(); !_c.done; _c = _b.next()) {
+            for (var _b = __values$1(Object.entries(attributes)), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var _d = __read$1(_c.value, 2), k = _d[0], v = _d[1];
                 this.setAttribute(k, v);
             }
@@ -83663,7 +83663,7 @@ var Tracer = /** @class */ (function () {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __values$1 = (undefined && undefined.__values) || function(o) {
+var __values = (undefined && undefined.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
     if (o && typeof o.length === "number") return {
@@ -83686,7 +83686,7 @@ var MultiSpanProcessor = /** @class */ (function () {
         var e_1, _a;
         var promises = [];
         try {
-            for (var _b = __values$1(this._spanProcessors), _c = _b.next(); !_c.done; _c = _b.next()) {
+            for (var _b = __values(this._spanProcessors), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var spanProcessor = _c.value;
                 promises.push(spanProcessor.forceFlush());
             }
@@ -83712,7 +83712,7 @@ var MultiSpanProcessor = /** @class */ (function () {
     MultiSpanProcessor.prototype.onStart = function (span, context) {
         var e_2, _a;
         try {
-            for (var _b = __values$1(this._spanProcessors), _c = _b.next(); !_c.done; _c = _b.next()) {
+            for (var _b = __values(this._spanProcessors), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var spanProcessor = _c.value;
                 spanProcessor.onStart(span, context);
             }
@@ -83728,7 +83728,7 @@ var MultiSpanProcessor = /** @class */ (function () {
     MultiSpanProcessor.prototype.onEnd = function (span) {
         var e_3, _a;
         try {
-            for (var _b = __values$1(this._spanProcessors), _c = _b.next(); !_c.done; _c = _b.next()) {
+            for (var _b = __values(this._spanProcessors), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var spanProcessor = _c.value;
                 spanProcessor.onEnd(span);
             }
@@ -83745,7 +83745,7 @@ var MultiSpanProcessor = /** @class */ (function () {
         var e_4, _a;
         var promises = [];
         try {
-            for (var _b = __values$1(this._spanProcessors), _c = _b.next(); !_c.done; _c = _b.next()) {
+            for (var _b = __values(this._spanProcessors), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var spanProcessor = _c.value;
                 promises.push(spanProcessor.shutdown());
             }
@@ -84028,115 +84028,36 @@ var BasicTracerProvider = /** @class */ (function () {
     return BasicTracerProvider;
 }());
 
-/*
- * Copyright The OpenTelemetry Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var __values = (undefined && undefined.__values) || function(o) {
-    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-    if (m) return m.call(o);
-    if (o && typeof o.length === "number") return {
-        next: function () {
-            if (o && i >= o.length) o = undefined;
-            return { value: o && o[i++], done: !o };
+let spansStorage = []; // In-memory storage for spans
+class JSONSpanExporter {
+    export(spans, resultCallback) {
+        for (const span of spans) {
+            spansStorage.push({
+                traceId: span.spanContext().traceId,
+                spanId: span.spanContext().spanId,
+                parentSpanId: span.parentSpanId || null,
+                name: span.name,
+                kind: span.kind,
+                startTime: span.startTime,
+                endTime: span.endTime,
+                attributes: span.attributes,
+                status: span.status,
+                events: span.events.map((event) => ({
+                    name: event.name,
+                    time: event.time,
+                    attributes: event.attributes,
+                })),
+            });
         }
-    };
-    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-};
-/**
- * This is implementation of {@link SpanExporter} that prints spans to the
- * console. This class can be used for diagnostic purposes.
- *
- * NOTE: This {@link SpanExporter} is intended for diagnostics use only, output rendered to the console may change at any time.
- */
-/* eslint-disable no-console */
-var ConsoleSpanExporter = /** @class */ (function () {
-    function ConsoleSpanExporter() {
+        // Indicate successful export
+        resultCallback({ code: ExportResultCode.SUCCESS });
     }
-    /**
-     * Export spans.
-     * @param spans
-     * @param resultCallback
-     */
-    ConsoleSpanExporter.prototype.export = function (spans, resultCallback) {
-        return this._sendSpans(spans, resultCallback);
-    };
-    /**
-     * Shutdown the exporter.
-     */
-    ConsoleSpanExporter.prototype.shutdown = function () {
-        this._sendSpans([]);
-        return this.forceFlush();
-    };
-    /**
-     * Exports any pending spans in exporter
-     */
-    ConsoleSpanExporter.prototype.forceFlush = function () {
+    // Graceful shutdown
+    async shutdown() {
+        spansStorage = []; // Optionally clear storage on shutdown
         return Promise.resolve();
-    };
-    /**
-     * converts span info into more readable format
-     * @param span
-     */
-    ConsoleSpanExporter.prototype._exportInfo = function (span) {
-        var _a;
-        return {
-            resource: {
-                attributes: span.resource.attributes,
-            },
-            instrumentationScope: span.instrumentationLibrary,
-            traceId: span.spanContext().traceId,
-            parentId: span.parentSpanId,
-            traceState: (_a = span.spanContext().traceState) === null || _a === undefined ? undefined : _a.serialize(),
-            name: span.name,
-            id: span.spanContext().spanId,
-            kind: span.kind,
-            timestamp: hrTimeToMicroseconds(span.startTime),
-            duration: hrTimeToMicroseconds(span.duration),
-            attributes: span.attributes,
-            status: span.status,
-            events: span.events,
-            links: span.links,
-        };
-    };
-    /**
-     * Showing spans in console
-     * @param spans
-     * @param done
-     */
-    ConsoleSpanExporter.prototype._sendSpans = function (spans, done) {
-        var e_1, _a;
-        try {
-            for (var spans_1 = __values(spans), spans_1_1 = spans_1.next(); !spans_1_1.done; spans_1_1 = spans_1.next()) {
-                var span = spans_1_1.value;
-                console.dir(this._exportInfo(span), { depth: 3 });
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (spans_1_1 && !spans_1_1.done && (_a = spans_1.return)) _a.call(spans_1);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-        if (done) {
-            return done({ code: ExportResultCode.SUCCESS });
-        }
-    };
-    return ConsoleSpanExporter;
-}());
-
+    }
+}
 const OTEL_CONSOLE_ONLY = process.env["OTEL_CONSOLE_ONLY"] === "true";
 const OTEL_ID_SEED = Number.parseInt(process.env["OTEL_ID_SEED"] ?? "0");
 function stringToRecord(s) {
@@ -84157,7 +84078,8 @@ function createTracerProvider(endpoint, headers, attributes) {
     const contextManager = new srcExports$1.AsyncHooksContextManager();
     contextManager.enable();
     context.setGlobalContextManager(contextManager);
-    let exporter = new ConsoleSpanExporter();
+    let exporter = new JSONSpanExporter(); // Use custom exporter
+    // let exporter: SpanExporter = new ConsoleSpanExporter();
     if (!OTEL_CONSOLE_ONLY) {
         if (isHttpEndpoint(endpoint)) {
             exporter = new OTLPTraceExporter({
@@ -84216,6 +84138,9 @@ class DeterministicIdGenerator {
         }
         return id;
     }
+}
+function getTraceJSON() {
+    return JSON.stringify(spansStorage, null, 2);
 }
 
 async function fetchGithub(token, runId) {
@@ -84282,6 +84207,7 @@ async function run() {
         const traceId = await traceWorkflowRun(workflowRun, jobs, jobAnnotations, prLabels);
         coreExports.setOutput("traceId", traceId);
         coreExports.info(`traceId: ${traceId}`);
+        coreExports.info(`JSON OUTPUT? :   ${getTraceJSON()}`);
         coreExports.info("Flush and shutdown tracer provider");
         await provider.forceFlush();
         await provider.shutdown();
