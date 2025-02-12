@@ -1,3 +1,5 @@
+import * as fs from "node:fs";
+import * as core from "@actions/core";
 import * as grpc from "@grpc/grpc-js";
 import { context } from "@opentelemetry/api";
 import type { Attributes } from "@opentelemetry/api";
@@ -14,6 +16,18 @@ import {
   type ReadableSpan,
   type SpanExporter,
 } from "@opentelemetry/sdk-trace-base";
+
+function writeObjectToJsonFile<T>(filePath: string, obj: T): Promise<string> {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(filePath, JSON.stringify(obj, null, 2), "utf8", (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(`Object written to ${filePath}`);
+      }
+    });
+  });
+}
 
 interface ExportedSpanData {
   traceId: string;
@@ -39,6 +53,7 @@ let spansStorage: ExportedSpanData[] = []; // In-memory storage for spans
 
 class JSONSpanExporter implements SpanExporter {
   export(spans: ReadableSpan[], resultCallback: (result: { code: ExportResultCode }) => void): void {
+    core.info(`Starting Spans: ${spans}`);
     for (const span of spans) {
       spansStorage.push({
         traceId: span.spanContext().traceId,
@@ -57,8 +72,19 @@ class JSONSpanExporter implements SpanExporter {
         })),
       });
     }
+
+    core.info(`Resulting Spans: ${spansStorage}`);
+
     // Indicate successful export
     resultCallback({ code: ExportResultCode.SUCCESS });
+  }
+  async forceFlush(): Promise<void> {
+    const filename = "data.json";
+    core.info(`Starting Spans to be Written: ${spansStorage}`);
+
+    writeObjectToJsonFile(filename, spansStorage);
+
+    core.info(`File Written Successfully to ${filename}`);
   }
 
   // Graceful shutdown
@@ -165,7 +191,4 @@ class DeterministicIdGenerator implements IdGenerator {
     return id;
   }
 }
-function getTraceJSON() {
-  return JSON.stringify(spansStorage, null, 2);
-}
-export { stringToRecord, createTracerProvider, getTraceJSON };
+export { stringToRecord, createTracerProvider };

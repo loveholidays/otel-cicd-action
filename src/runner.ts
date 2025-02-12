@@ -6,7 +6,7 @@ import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic
 import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from "@opentelemetry/semantic-conventions/incubating";
 import { getJobsAnnotations, getPRsLabels, getWorkflowRun, listJobsForWorkflowRun } from "./github";
 import { traceWorkflowRun } from "./trace/workflow";
-import { createTracerProvider, getTraceJSON, stringToRecord } from "./tracer";
+import { createTracerProvider, stringToRecord } from "./tracer";
 
 async function fetchGithub(token: string, runId: number) {
   const octokit = getOctokit(token);
@@ -16,6 +16,7 @@ async function fetchGithub(token: string, runId: number) {
 
   core.info("Get jobs");
   const jobs = await listJobsForWorkflowRun(context, octokit, runId);
+  core.info(`Number of Jobs Found: ${jobs.length}`);
 
   core.info("Get job annotations");
   const jobsId = (jobs ?? []).map((job) => job.id);
@@ -72,14 +73,13 @@ async function run() {
       ...extraAttributes,
     };
     const provider = createTracerProvider(otlpEndpoint, otlpHeaders, attributes);
+    core.info(`Provider Spans ${provider.activeSpanProcessor}`);
 
     core.info(`Trace workflow run for ${runId} and export to ${otlpEndpoint}`);
     const traceId = await traceWorkflowRun(workflowRun, jobs, jobAnnotations, prLabels);
 
     core.setOutput("traceId", traceId);
     core.info(`traceId: ${traceId}`);
-
-    core.info(`JSON OUTPUT? :   ${getTraceJSON()}`);
 
     core.info("Flush and shutdown tracer provider");
     await provider.forceFlush();

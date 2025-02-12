@@ -30,6 +30,7 @@ import require$$6$1 from 'string_decoder';
 import require$$0$e from 'diagnostics_channel';
 import require$$1$7 from 'child_process';
 import require$$6$2 from 'timers';
+import * as fs from 'node:fs';
 import process$1 from 'process';
 import require$$0$f from 'http2';
 import require$$1$8 from 'dns';
@@ -84028,9 +84029,22 @@ var BasicTracerProvider = /** @class */ (function () {
     return BasicTracerProvider;
 }());
 
+function writeObjectToJsonFile(filePath, obj) {
+    return new Promise((resolve, reject) => {
+        fs.writeFile(filePath, JSON.stringify(obj, null, 2), "utf8", (err) => {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve(`Object written to ${filePath}`);
+            }
+        });
+    });
+}
 let spansStorage = []; // In-memory storage for spans
 class JSONSpanExporter {
     export(spans, resultCallback) {
+        coreExports.info(`Starting Spans: ${spans}`);
         for (const span of spans) {
             spansStorage.push({
                 traceId: span.spanContext().traceId,
@@ -84049,8 +84063,15 @@ class JSONSpanExporter {
                 })),
             });
         }
+        coreExports.info(`Resulting Spans: ${spansStorage}`);
         // Indicate successful export
         resultCallback({ code: ExportResultCode.SUCCESS });
+    }
+    async forceFlush() {
+        const filename = "data.json";
+        coreExports.info(`Starting Spans to be Written: ${spansStorage}`);
+        writeObjectToJsonFile(filename, spansStorage);
+        coreExports.info(`File Written Successfully to ${filename}`);
     }
     // Graceful shutdown
     async shutdown() {
@@ -84139,9 +84160,6 @@ class DeterministicIdGenerator {
         return id;
     }
 }
-function getTraceJSON() {
-    return JSON.stringify(spansStorage, null, 2);
-}
 
 async function fetchGithub(token, runId) {
     const octokit = githubExports.getOctokit(token);
@@ -84149,6 +84167,7 @@ async function fetchGithub(token, runId) {
     const workflowRun = await getWorkflowRun(githubExports.context, octokit, runId);
     coreExports.info("Get jobs");
     const jobs = await listJobsForWorkflowRun(githubExports.context, octokit, runId);
+    coreExports.info(`Number of Jobs Found: ${jobs.length}`);
     coreExports.info("Get job annotations");
     const jobsId = (jobs ?? []).map((job) => job.id);
     let jobAnnotations = {};
@@ -84203,11 +84222,11 @@ async function run() {
             ...extraAttributes,
         };
         const provider = createTracerProvider(otlpEndpoint, otlpHeaders, attributes);
+        coreExports.info(`Provider Spans ${provider.activeSpanProcessor}`);
         coreExports.info(`Trace workflow run for ${runId} and export to ${otlpEndpoint}`);
         const traceId = await traceWorkflowRun(workflowRun, jobs, jobAnnotations, prLabels);
         coreExports.setOutput("traceId", traceId);
         coreExports.info(`traceId: ${traceId}`);
-        coreExports.info(`JSON OUTPUT? :   ${getTraceJSON()}`);
         coreExports.info("Flush and shutdown tracer provider");
         await provider.forceFlush();
         await provider.shutdown();
