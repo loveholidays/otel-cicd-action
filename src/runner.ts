@@ -51,6 +51,7 @@ async function run() {
   try {
     const otlpEndpoint = core.getInput("otlpEndpoint");
     const otlpHeaders = core.getInput("otlpHeaders");
+    const filePath = core.getInput("filePath");
     const otelServiceName = core.getInput("otelServiceName") || process.env["OTEL_SERVICE_NAME"] || "";
     const runId = Number.parseInt(core.getInput("runId") || `${context.runId}`);
     const extraAttributes = stringToRecord(core.getInput("extraAttributes"));
@@ -72,7 +73,7 @@ async function run() {
       [ATTR_SERVICE_VERSION]: workflowRun.head_sha,
       ...extraAttributes,
     };
-    const provider = createTracerProvider(otlpEndpoint, otlpHeaders, attributes);
+    const provider = createTracerProvider(otlpEndpoint, otlpHeaders, attributes, filePath);
     core.info(`Provider Spans ${provider.activeSpanProcessor}`);
 
     core.info(`Trace workflow run for ${runId} and export to ${otlpEndpoint}`);

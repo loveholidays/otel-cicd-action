@@ -19,7 +19,7 @@ describe("createTracerProvider", () => {
   });
 
   it("has resource attributes", () => {
-    provider = createTracerProvider("localhost", "test=foo", attributes);
+    provider = createTracerProvider("localhost", "test=foo", attributes, "data.json");
     expect(provider.resource.attributes[ATTR_SERVICE_NAME]).toEqual(attributes[ATTR_SERVICE_NAME]);
     expect(provider.resource.attributes[ATTR_SERVICE_VERSION]).toEqual(attributes[ATTR_SERVICE_VERSION]);
     expect(provider.resource.attributes[ATTR_SERVICE_INSTANCE_ID]).toEqual(attributes[ATTR_SERVICE_INSTANCE_ID]);
@@ -28,19 +28,19 @@ describe("createTracerProvider", () => {
   });
 
   it("has active span processor", () => {
-    provider = createTracerProvider("localhost", "test=foo", attributes);
+    provider = createTracerProvider("localhost", "test=foo", attributes, "data.json");
     const spanProcessor = provider.getActiveSpanProcessor();
     expect(spanProcessor).toBeDefined();
   });
 
   it("supports https", () => {
-    provider = createTracerProvider("https://localhost", "test=foo", attributes);
+    provider = createTracerProvider("https://localhost", "test=foo", attributes, "data.json");
     const spanProcessor = provider.getActiveSpanProcessor();
     expect(spanProcessor).toBeDefined();
   });
 
   it("supports http", () => {
-    provider = createTracerProvider("http://localhost", "test=foo", attributes);
+    provider = createTracerProvider("http://localhost", "test=foo", attributes, "data.json");
     const spanProcessor = provider.getActiveSpanProcessor();
     expect(spanProcessor).toBeDefined();
   });

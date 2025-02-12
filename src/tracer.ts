@@ -52,6 +52,12 @@ interface ExportedSpanData {
 let spansStorage: ExportedSpanData[] = []; // In-memory storage for spans
 
 class JSONSpanExporter implements SpanExporter {
+  filePath: string;
+
+  constructor(filePath: string) {
+    this.filePath = filePath;
+  }
+
   export(spans: ReadableSpan[], resultCallback: (result: { code: ExportResultCode }) => void): void {
     core.info(`Starting Spans: ${spans}`);
     for (const span of spans) {
@@ -75,12 +81,11 @@ class JSONSpanExporter implements SpanExporter {
 
     core.info(`Resulting Spans: ${spansStorage}`);
 
-    const filename = "data.json";
     core.info(`Starting Spans to be Written: ${spansStorage}`);
 
-    writeObjectToJsonFile(filename, spansStorage);
+    writeObjectToJsonFile(this.filePath, spansStorage);
 
-    core.info(`File Written Successfully to ${filename}`);
+    core.info(`File Written Successfully to ${this.filePath}`);
 
     // Indicate successful export
     resultCallback({ code: ExportResultCode.SUCCESS });
@@ -113,13 +118,18 @@ function isHttpEndpoint(endpoint: string) {
   return endpoint.startsWith("https://") || endpoint.startsWith("http://");
 }
 
-function createTracerProvider(endpoint: string, headers: string, attributes: ResourceAttributes) {
+function createTracerProvider(
+  endpoint: string,
+  headers: string,
+  attributes: ResourceAttributes,
+  filePath = "data.json",
+) {
   // Register the context manager to enable context propagation
   const contextManager = new AsyncHooksContextManager();
   contextManager.enable();
   context.setGlobalContextManager(contextManager);
 
-  let exporter: SpanExporter = new JSONSpanExporter(); // Use custom exporter
+  let exporter: SpanExporter = new JSONSpanExporter(filePath); // Use custom exporter
 
   // let exporter: SpanExporter = new ConsoleSpanExporter();
 

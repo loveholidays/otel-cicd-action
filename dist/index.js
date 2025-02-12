@@ -84043,6 +84043,10 @@ function writeObjectToJsonFile(filePath, obj) {
 }
 let spansStorage = []; // In-memory storage for spans
 class JSONSpanExporter {
+    filePath;
+    constructor(filePath) {
+        this.filePath = filePath;
+    }
     export(spans, resultCallback) {
         coreExports.info(`Starting Spans: ${spans}`);
         for (const span of spans) {
@@ -84064,10 +84068,9 @@ class JSONSpanExporter {
             });
         }
         coreExports.info(`Resulting Spans: ${spansStorage}`);
-        const filename = "data.json";
         coreExports.info(`Starting Spans to be Written: ${spansStorage}`);
-        writeObjectToJsonFile(filename, spansStorage);
-        coreExports.info(`File Written Successfully to ${filename}`);
+        writeObjectToJsonFile(this.filePath, spansStorage);
+        coreExports.info(`File Written Successfully to ${this.filePath}`);
         // Indicate successful export
         resultCallback({ code: ExportResultCode.SUCCESS });
     }
@@ -84093,12 +84096,12 @@ function stringToRecord(s) {
 function isHttpEndpoint(endpoint) {
     return endpoint.startsWith("https://") || endpoint.startsWith("http://");
 }
-function createTracerProvider(endpoint, headers, attributes) {
+function createTracerProvider(endpoint, headers, attributes, filePath = "data.json") {
     // Register the context manager to enable context propagation
     const contextManager = new srcExports$1.AsyncHooksContextManager();
     contextManager.enable();
     context.setGlobalContextManager(contextManager);
-    let exporter = new JSONSpanExporter(); // Use custom exporter
+    let exporter = new JSONSpanExporter(filePath); // Use custom exporter
     // let exporter: SpanExporter = new ConsoleSpanExporter();
     if (!OTEL_CONSOLE_ONLY) {
         if (isHttpEndpoint(endpoint)) {
@@ -84201,6 +84204,7 @@ async function run() {
     try {
         const otlpEndpoint = coreExports.getInput("otlpEndpoint");
         const otlpHeaders = coreExports.getInput("otlpHeaders");
+        const filePath = coreExports.getInput("filePath");
         const otelServiceName = coreExports.getInput("otelServiceName") || process.env["OTEL_SERVICE_NAME"] || "";
         const runId = Number.parseInt(coreExports.getInput("runId") || `${githubExports.context.runId}`);
         const extraAttributes = stringToRecord(coreExports.getInput("extraAttributes"));
@@ -84220,7 +84224,7 @@ async function run() {
             [ATTR_SERVICE_VERSION]: workflowRun.head_sha,
             ...extraAttributes,
         };
-        const provider = createTracerProvider(otlpEndpoint, otlpHeaders, attributes);
+        const provider = createTracerProvider(otlpEndpoint, otlpHeaders, attributes, filePath);
         coreExports.info(`Provider Spans ${provider.activeSpanProcessor}`);
         coreExports.info(`Trace workflow run for ${runId} and export to ${otlpEndpoint}`);
         const traceId = await traceWorkflowRun(workflowRun, jobs, jobAnnotations, prLabels);
