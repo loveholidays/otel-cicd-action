@@ -84072,9 +84072,11 @@ class JSONSpanExporter {
         coreExports.info(`Starting Spans to be Written: ${spansStorage}`);
         writeObjectToJsonFile(filename, spansStorage);
         coreExports.info(`File Written Successfully to ${filename}`);
+        return Promise.resolve();
     }
     // Graceful shutdown
     async shutdown() {
+        coreExports.info("Calling from inner Shutdown()");
         spansStorage = []; // Optionally clear storage on shutdown
         return Promise.resolve();
     }

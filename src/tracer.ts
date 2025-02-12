@@ -85,10 +85,12 @@ class JSONSpanExporter implements SpanExporter {
     writeObjectToJsonFile(filename, spansStorage);
 
     core.info(`File Written Successfully to ${filename}`);
+    return Promise.resolve();
   }
 
   // Graceful shutdown
   async shutdown(): Promise<void> {
+    core.info("Calling from inner Shutdown()");
     spansStorage = []; // Optionally clear storage on shutdown
     return Promise.resolve();
   }
